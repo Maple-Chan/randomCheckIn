@@ -91,6 +91,11 @@ export default {
                     localStorage.setItem('checkInStuList', JSON.stringify(this.dynamicTags));
                     this.bottomShow = [];
                     this.dynamicTags.forEach(item => this.bottomShow.push({ text: item, isActive: false }));
+
+                    /// 重置点名
+                    this.notCheckSutList = [];
+                    this.dynamicTags.forEach(item => this.notCheckSutList.push(item)); // 初始化为点名为完整名单
+                    this.alreadyCheckedList = []; // 初始化已点名为空
                 })
                 .catch(_ => { });
         },
@@ -233,14 +238,19 @@ a {
     background-color: #d3d7db;
     padding: 10px;
     /* flex 布局 */
-    display: flex;
+    /* display: flex;
     justify-content: space-around;
-    flex-wrap: wrap;
+    flex-wrap: wrap;  */
+    /* grid 布局 */
+    display: grid;
+    grid-template-columns: repeat(6, 1fr); /* 每行3个组件 */
+    grid-gap: 10px; /* 格子间隔 */
+
     /* 边框阴影 */
     box-shadow: 0 2px 4px rgba(0, 0, 0, .12), 0 0 6px rgba(0, 0, 0, .04);
     margin: 0;
     position: absolute;
-    top: 50%;
+    top: 30%;
     left: 50%;
     -ms-transform: translate(-50%, -50%);
     transform: translate(-50%, -50%);
@@ -260,5 +270,4 @@ a {
     background-color: #e25b0d;
     color: #f7faf2;
 }
-
 </style>
