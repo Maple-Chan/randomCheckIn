@@ -1,12 +1,11 @@
 <template>
     <div class="">
-        
+
         <div shadow="always" class="flexBodyName">
-            <div v-for = "name in dynamicTags">
-                <el-button size = "small"> {{ name  }}</el-button>
+            <div v-for="(name, index) in bottomShow" :key="index">
+                <el-button size="small" :class="{ 'round-color': name.isActive }" @click=""> {{ name.text }}</el-button>
             </div>
         </div>
-
 
 
         <el-drawer title="修改名单" :visible.sync="drawer" :direction="direction" :before-close="handleDrawerClose">
@@ -18,13 +17,16 @@
                 @keyup.enter.native="handleInputConfirm" @blur="handleInputConfirm">
             </el-input>
             <el-button v-else class="button-new-tag" size="small" @click="showInput">+ 新增</el-button>
-            <el-button @click="cleanData" size = "small" type="primary" style="margin-left: 16px; position: absolute; bottom: 10%; right: 40%"> 清空 </el-button>
+            <el-button @click="cleanData" size="small" type="primary"
+                style="margin-left: 16px; position: absolute; bottom: 10%; right: 40%"> 清空 </el-button>
         </el-drawer>
 
-        <el-button @click="drawer = true" type="primary" style="margin-left: 16px; position: absolute; bottom: 10%; right: 10%;">
+        <el-button @click="drawer = true" type="primary"
+            style="margin-left: 16px; position: absolute; bottom: 10%; right: 10%;">
             修改名单
         </el-button>
 
+        <!-- 需要防抖 -->
         <el-button @click="handleRandomCheck" type="primary" class="start">
             开始点名
         </el-button>
@@ -37,12 +39,18 @@ export default {
     name: 'RandomCheckIn',
     data() {
         return {
-            dynamicTags: [],
+            dynamicTags: [], // 所有名单
+            notCheckSutList: [], // 未点到名单
+            alreadyCheckedList: [], // 已点到的名单
             inputVisible: false,
             inputValue: '',
             drawer: false,
             direction: 'rtl',
-            msg: 'Welcome to Your Vue.js App  CheckIn'
+            colorIndex: 0,
+            bottomShow: [],
+            intervalId: null,
+            bottomCount: [],
+            curStudent: ''
         }
     },
     created() {
@@ -55,13 +63,34 @@ export default {
         } else {
             this.drawer = true;
         }
+        this.bottomShow = [];
+        this.dynamicTags.forEach(item => this.bottomShow.push({ text: item, isActive: false }));
+
+        this.notCheckSutList = [];
+        this.dynamicTags.forEach(item => this.notCheckSutList.push(item)); // 初始化为点名为完整名单
+        this.alreadyCheckedList = []; // 初始化已点名为空
     },
     methods: {
+        toggleButton(index) {
+            this.bottomShow.forEach((btn, i) => {
+                btn.isActive = i === index
+            })
+            // 已选中的标记按钮点亮
+            this.alreadyCheckedList.forEach(item => {
+                for (let i = 0; i < this.bottomShow.length; ++i) {
+                    if (this.bottomShow[i].text == item) {
+                        this.bottomShow[i].isActive = true;
+                    }
+                }
+            })
+        },
         handleDrawerClose(done) {
             this.$confirm('确认关闭？')
                 .then(_ => {
                     done();
                     localStorage.setItem('checkInStuList', JSON.stringify(this.dynamicTags));
+                    this.bottomShow = [];
+                    this.dynamicTags.forEach(item => this.bottomShow.push({ text: item, isActive: false }));
                 })
                 .catch(_ => { });
         },
@@ -77,7 +106,7 @@ export default {
             });
         },
 
-        cleanData(){
+        cleanData() {
             this.dynamicTags = [];
             localStorage.setItem('checkInStuList', JSON.stringify(this.dynamicTags));
         },
@@ -91,8 +120,60 @@ export default {
             this.inputValue = '';
         },
 
-        handleRandomCheck(){
-            const cnt = this.dynamicTags.length;
+        async handleRandomCheck() {
+            console.log("开始")
+
+            if (this.notCheckSutList.length <= 0) {
+                this.resetCheck();
+                alert('所有同学都已点到！');
+                return;
+            }
+
+            // 开始
+            let lastIndex = 0;
+            let currentIndex = 0;
+            this.intervalId = setInterval(() => {
+                this.toggleButton(currentIndex);
+                lastIndex = currentIndex;
+                currentIndex = (currentIndex + 1) % this.bottomShow.length;
+
+            }, 50); // 每秒轮询一次
+
+            await new Promise(resolve => setTimeout(resolve, 1000));
+
+            // 停止
+            if (this.intervalId) {
+                clearInterval(this.intervalId);
+                this.intervalId = null;
+            }
+            this.bottomShow[lastIndex].isActive = false;
+
+
+            // 随机选中人员
+            const randomIndex = Math.floor(Math.random() * this.notCheckSutList.length);
+            this.curStudent = this.notCheckSutList[randomIndex];
+            this.alreadyCheckedList.push(this.curStudent);
+            this.notCheckSutList.splice(randomIndex, 1); // 标记已点名
+
+            // 已选中的标记按钮点亮
+            this.alreadyCheckedList.forEach(item => {
+                for (let i = 0; i < this.bottomShow.length; ++i) {
+                    if (this.bottomShow[i].text == item) {
+                        this.bottomShow[i].isActive = true;
+                    }
+                }
+            })
+
+
+            console.log(this.notCheckSutList);
+            console.log(this.alreadyCheckedList);
+        },
+
+        // 重置所有点名清单
+        resetCheck() {
+            this.notCheckSutList = [];
+            this.dynamicTags.forEach(item => this.notCheckSutList.push(item)); // 初始化为点名为完整名单
+            this.alreadyCheckedList = []; // 初始化已点名为空
         }
     }
 }
@@ -136,7 +217,7 @@ a {
     height: 32px;
 }
 
-.button-clean{
+.button-clean {
     margin-left: 10px;
     height: 32px;
     line-height: 30px;
@@ -147,27 +228,37 @@ a {
 
 /* 点名器主面板 */
 .flexBodyName {
-	width: 70%;
-	margin: auto;
-	background-color: #d3d7db;
-	padding: 10px;
-	/* flex 布局 */
-	display: flex;
-	justify-content: space-around;
-	flex-wrap: wrap;
-	/* 边框阴影 */
-	box-shadow: 0 2px 4px rgba(0, 0, 0, .12), 0 0 6px rgba(0, 0, 0, .04);
-	margin: 0;
-	position: absolute;
-	top: 50%;
-	left: 50%;
-	-ms-transform: translate(-50%, -50%);
-	transform: translate(-50%, -50%);
+    width: 70%;
+    margin: auto;
+    background-color: #d3d7db;
+    padding: 10px;
+    /* flex 布局 */
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    /* 边框阴影 */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, .12), 0 0 6px rgba(0, 0, 0, .04);
+    margin: 0;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    -ms-transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%);
 }
-.start{
-    margin-left: 16px; position: absolute; bottom: 10%; right: 20%;
+
+.start {
+    margin-left: 16px;
+    position: absolute;
+    bottom: 10%;
+    right: 20%;
     background-color: #e25b0d;
     box-shadow: 0 2px 4px rgba(233, 222, 222, 0.842), 0 0 6px rgba(233, 219, 219, 0.877);
     border: #d3d7db;
 }
+
+.round-color {
+    background-color: #e25b0d;
+    color: #f7faf2;
+}
+
 </style>
