@@ -60,7 +60,6 @@ export default {
             colorIndex: 0,
             bottomShow: [],
             intervalId: null,
-            bottomCount: [],
             curStudent: ''
         }
     },
@@ -73,6 +72,7 @@ export default {
             this.drawer = false;
         } else {
             this.drawer = true;
+            this.dynamicTags = [];
         }
         this.bottomShow = [];
         this.dynamicTags.forEach(item => this.bottomShow.push({ text: item, isActive: false }));
@@ -106,7 +106,7 @@ export default {
         handleDrawerClose(done) {
             this.$confirm('确认关闭？')
                 .then(_ => {
-                    done();
+                    
                     localStorage.setItem('checkInStuList', JSON.stringify(this.dynamicTags));
                     this.bottomShow = [];
                     this.dynamicTags.forEach(item => this.bottomShow.push({ text: item, isActive: false }));
@@ -115,6 +115,7 @@ export default {
                     this.notCheckSutList = [];
                     this.dynamicTags.forEach(item => this.notCheckSutList.push(item)); // 初始化为点名为完整名单
                     this.alreadyCheckedList = []; // 初始化已点名为空
+                    done();
                 })
                 .catch(_ => { });
         },
@@ -133,9 +134,15 @@ export default {
         cleanData() {
             this.$confirm('确认清空？')
                 .then(_ => {
-                    done();
+                    
+                    console.log("开始清空..." + this.bottomShow)
                     this.dynamicTags = [];
+                    this.bottomShow = [];
+                    this.notCheckSutList = [];
+                    this.alreadyCheckedList = [];
                     localStorage.setItem('checkInStuList', JSON.stringify(this.dynamicTags));
+                    console.log("清空结束..." + this.bottomShow);
+                    done();
                 })
                 .catch(_ => { });
         },
