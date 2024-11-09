@@ -2,13 +2,15 @@
     <div class="">
 
         <div shadow="always" class="flexBodyName">
-            <div v-for="(name, index) in bottomShow" :key="index">
-                <el-button size="small" :class="{ 'round-color': name.isActive }" @click=""> {{ name.text }}</el-button>
+            <div v-for="(name, index) in bottomShow" :key="index" class="botton-list">
+                <el-button size="small" :class="{ 'round-color': name.isActive, 'botton-list': true }" @click=""> {{
+                    name.text }}</el-button>
             </div>
         </div>
 
 
-        <el-drawer title="修改名单" :visible.sync="drawer" :direction="direction" :before-close="handleDrawerClose">
+        <el-drawer title="修改名单" :visible.sync="drawer" :direction="direction" :before-close="handleDrawerClose"
+            :size="'50%'">
             <el-tag :key="tag" v-for="tag in dynamicTags" closable :disable-transitions="false"
                 @close="handleClose(tag)">
                 {{ tag }}
@@ -16,18 +18,22 @@
             <el-input class="input-new-tag" v-if="inputVisible" v-model="inputValue" ref="saveTagInput"
                 @keyup.enter.native="handleInputConfirm" @blur="handleInputConfirm">
             </el-input>
-            <el-button v-else class="button-new-tag" size="small" @click="showInput">+ 新增</el-button>
+            <el-button ref="addTag" v-else class="button-new-tag" size="small" @click="showInput"
+                @keyup.enter.native="showInput">
+                + 新增
+            </el-button>
             <el-button @click="cleanData" size="small" type="primary"
-                style="margin-left: 16px; position: absolute; bottom: 10%; right: 40%"> 清空 </el-button>
+                style="margin-left: 16px; display: flex; position: fixed; bottom: 2%; right: 10%;"> 清空
+            </el-button>
         </el-drawer>
 
-        <el-button @click="drawer = true" type="primary"
-            style="margin-left: 16px; position: absolute; bottom: 10%; right: 10%;">
+
+        <el-button @click="drawer = true" type="primary" class="change">
             修改名单
         </el-button>
 
         <!-- 需要防抖 -->
-        <el-button v-debounce:5000 ="handleRandomCheck" type="primary" class="start">
+        <el-button v-debounce:5000="handleRandomCheck" type="primary" class="start">
             开始点名
         </el-button>
     </div>
@@ -45,7 +51,7 @@ export default {
             inputVisible: false,
             inputValue: '',
             drawer: false,
-            direction: 'rtl',
+            direction: 'btt',
             colorIndex: 0,
             bottomShow: [],
             intervalId: null,
@@ -69,6 +75,14 @@ export default {
         this.notCheckSutList = [];
         this.dynamicTags.forEach(item => this.notCheckSutList.push(item)); // 初始化为点名为完整名单
         this.alreadyCheckedList = []; // 初始化已点名为空
+    },
+    mounted() {
+        // 在mounted钩子中添加事件监听
+        window.addEventListener('keyup', this.handleKeyUp);
+    },
+    beforeDestroy() {
+        // 在组件销毁前移除事件监听
+        window.removeEventListener('keyup', this.handleKeyUp);
     },
     methods: {
         toggleButton(index) {
@@ -112,8 +126,13 @@ export default {
         },
 
         cleanData() {
-            this.dynamicTags = [];
-            localStorage.setItem('checkInStuList', JSON.stringify(this.dynamicTags));
+            this.$confirm('确认清空？')
+                .then(_ => {
+                    done();
+                    this.dynamicTags = [];
+                    localStorage.setItem('checkInStuList', JSON.stringify(this.dynamicTags));
+                })
+                .catch(_ => { });
         },
 
         handleInputConfirm() {
@@ -179,7 +198,13 @@ export default {
             this.notCheckSutList = [];
             this.dynamicTags.forEach(item => this.notCheckSutList.push(item)); // 初始化为点名为完整名单
             this.alreadyCheckedList = []; // 初始化已点名为空
-        }
+        },
+        handleKeyUp(event) {
+            // 检查按键是否是回车键
+            if (event.keyCode === 13) {
+                this.showInput();
+            }
+        },
     },
 
     directives: {
@@ -247,17 +272,17 @@ a {
 
 /* 点名器主面板 */
 .flexBodyName {
-    width: 70%;
+    width: 80%;
     margin: auto;
     background-color: #d3d7db;
     padding: 10px;
     /* flex 布局 */
-    /* display: flex;
+    display: flex;
     justify-content: space-around;
-    flex-wrap: wrap;  */
+    flex-wrap: wrap;
     /* grid 布局 */
-    display: grid;
-    grid-template-columns: repeat(6, 1fr);
+    /* display: grid;
+    grid-template-columns: repeat(6, 1fr); */
     /* 每行3个组件 */
     grid-gap: 10px;
     /* 格子间隔 */
@@ -272,11 +297,24 @@ a {
     transform: translate(-50%, -50%);
 }
 
-.start {
+.change {
+    display: flex;
+    position: fixed;
+    bottom: 10%;
+    right: 10%;
     margin-left: 16px;
-    position: absolute;
+    box-shadow: 0 2px 4px rgba(233, 222, 222, 0.842), 0 0 6px rgba(233, 219, 219, 0.877);
+    border: #d3d7db;
+}
+
+.start {
+    display: flex;
+    position: fixed;
     bottom: 10%;
     right: 20%;
+
+    margin-left: 16px;
+    margin-right: 60px;
     background-color: #e25b0d;
     box-shadow: 0 2px 4px rgba(233, 222, 222, 0.842), 0 0 6px rgba(233, 219, 219, 0.877);
     border: #d3d7db;
@@ -285,5 +323,11 @@ a {
 .round-color {
     background-color: #e25b0d;
     color: #f7faf2;
+}
+
+.botton-list {
+    width: 100px;
+    justify-content: center;
+    align-items: center;
 }
 </style>
