@@ -27,7 +27,7 @@
         </el-button>
 
         <!-- 需要防抖 -->
-        <el-button @click="handleRandomCheck" type="primary" class="start">
+        <el-button v-debounce:5000 ="handleRandomCheck" type="primary" class="start">
             开始点名
         </el-button>
     </div>
@@ -180,6 +180,20 @@ export default {
             this.dynamicTags.forEach(item => this.notCheckSutList.push(item)); // 初始化为点名为完整名单
             this.alreadyCheckedList = []; // 初始化已点名为空
         }
+    },
+
+    directives: {
+        debounce: {
+            inserted(el, binding) {
+                let timeout;
+                el.addEventListener("click", () => {
+                    if (timeout) clearTimeout(timeout);
+                    timeout = setTimeout(() => {
+                        binding.value();
+                    }, binding.args || 500);
+                })
+            }
+        }
     }
 }
 </script>
@@ -243,8 +257,10 @@ a {
     flex-wrap: wrap;  */
     /* grid 布局 */
     display: grid;
-    grid-template-columns: repeat(6, 1fr); /* 每行3个组件 */
-    grid-gap: 10px; /* 格子间隔 */
+    grid-template-columns: repeat(6, 1fr);
+    /* 每行3个组件 */
+    grid-gap: 10px;
+    /* 格子间隔 */
 
     /* 边框阴影 */
     box-shadow: 0 2px 4px rgba(0, 0, 0, .12), 0 0 6px rgba(0, 0, 0, .04);
