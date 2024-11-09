@@ -1,8 +1,10 @@
 <template>
     <div class="">
-        <div  class="container">
+        <div class="container">
             <el-header>
-                <el-card shadow="always" body-style="display: flex; padding: '0px' ; align-items: center; justify-content: center;" class="card">
+                <el-card shadow="always"
+                    body-style="display: flex; padding: '0px' ; align-items: center; justify-content: center;"
+                    class="card">
                     <span>{{ curStudent }}</span>
                 </el-card>
             </el-header>
@@ -10,7 +12,7 @@
                 <div shadow="always" class="flexBodyName">
                     <div v-for="(name, index) in bottomShow" :key="index" class="botton-list">
                         <el-button size="small" :class="{ 'round-color': name.isActive, 'botton-list': true }"
-                            @click=""> {{name.text }}</el-button>
+                            @click=""> {{ name.text }}</el-button>
                     </div>
                 </div>
             </div>
@@ -52,7 +54,7 @@
 
 
 
-        </div >
+        </div>
 
     </div>
 </template>
@@ -339,17 +341,18 @@ a {
     left: 35%;
     flex-wrap: wrap;
     color: #e25b0d;
-    font-weight: bold;  
+    font-weight: bold;
     justify-content: center;
     align-items: center;
 }
 
-.menu-btn{
+.menu-btn {
     display: inline;
     position: fixed;
     bottom: 10%;
     right: 10%;
 }
+
 .change {
     text-align: center;
     width: 90px;
