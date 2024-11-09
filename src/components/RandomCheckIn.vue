@@ -1,45 +1,58 @@
 <template>
     <div class="">
-
-        <div shadow="always" class="flexBodyName">
-            <div v-for="(name, index) in bottomShow" :key="index" class="botton-list">
-                <el-button size="small" :class="{ 'round-color': name.isActive, 'botton-list': true }" @click=""> {{
-                    name.text }}</el-button>
+        <div  class="container">
+            <el-header>
+                <el-card shadow="always" body-style="display: flex; padding: '0px' ; align-items: center; justify-content: center;" class="card">
+                    <span>{{ curStudent }}</span>
+                </el-card>
+            </el-header>
+            <div class="con-main">
+                <div shadow="always" class="flexBodyName">
+                    <div v-for="(name, index) in bottomShow" :key="index" class="botton-list">
+                        <el-button size="small" :class="{ 'round-color': name.isActive, 'botton-list': true }"
+                            @click=""> {{name.text }}</el-button>
+                    </div>
+                </div>
             </div>
-        </div>
+
+            <div class="menu-btn">
+                <el-button @click="drawer = true" type="primary" class="change">
+                    修改名单
+                </el-button>
+
+                <!-- 需要防抖 -->
+                <el-button v-debounce:5000="handleRandomCheck" type="primary" class="start">
+                    开始点名
+                </el-button>
+
+                <el-button v-debounce:5000="resetCheck" type="primary" class="reset">
+                    重置点名
+                </el-button>
+            </div>
 
 
-        <el-drawer title="修改名单" :visible.sync="drawer" :direction="direction" :before-close="handleDrawerClose"
-            :size="'50%'">
-            <el-tag :key="tag" v-for="tag in dynamicTags" closable :disable-transitions="false"
-                @close="handleClose(tag)">
-                {{ tag }}
-            </el-tag>
-            <el-input class="input-new-tag" v-if="inputVisible" v-model="inputValue" ref="saveTagInput"
-                @keyup.enter.native="handleInputConfirm" @blur="handleInputConfirm">
-            </el-input>
-            <el-button ref="addTag" v-else class="button-new-tag" size="small" @click="showInput"
-                @keyup.enter.native="showInput">
-                + 新增
-            </el-button>
-            <el-button @click="cleanData" size="small" type="primary"
-                style="margin-left: 16px; display: flex; position: fixed; bottom: 2%; right: 10%;"> 清空
-            </el-button>
-        </el-drawer>
+
+            <el-drawer title="修改名单" :visible.sync="drawer" :direction="direction" :before-close="handleDrawerClose"
+                :size="'50%'">
+                <el-tag :key="tag" v-for="tag in dynamicTags" closable :disable-transitions="false"
+                    @close="handleClose(tag)">
+                    {{ tag }}
+                </el-tag>
+                <el-input class="input-new-tag" v-if="inputVisible" v-model="inputValue" ref="saveTagInput"
+                    @keyup.enter.native="handleInputConfirm" @blur="handleInputConfirm">
+                </el-input>
+                <el-button ref="addTag" v-else class="button-new-tag" size="small" @click="showInput"
+                    @keyup.enter.native="showInput">
+                    + 新增
+                </el-button>
+                <el-button @click="cleanData" size="small" type="primary"
+                    style="margin-left: 16px; display: flex; position: fixed; bottom: 2%; right: 10%;"> 清空
+                </el-button>
+            </el-drawer>
 
 
-        <el-button @click="drawer = true" type="primary" class="change">
-            修改名单
-        </el-button>
 
-        <!-- 需要防抖 -->
-        <el-button v-debounce:5000="handleRandomCheck" type="primary" class="start">
-            开始点名
-        </el-button>
-
-        <el-button v-debounce:5000="resetCheck" type="primary" class="reset">
-            重置点名
-        </el-button>
+        </div >
 
     </div>
 </template>
@@ -106,7 +119,7 @@ export default {
         handleDrawerClose(done) {
             this.$confirm('确认关闭？')
                 .then(_ => {
-                    
+
                     localStorage.setItem('checkInStuList', JSON.stringify(this.dynamicTags));
                     this.bottomShow = [];
                     this.dynamicTags.forEach(item => this.bottomShow.push({ text: item, isActive: false }));
@@ -134,7 +147,7 @@ export default {
         cleanData() {
             this.$confirm('确认清空？')
                 .then(_ => {
-                    
+
                     console.log("开始清空..." + this.bottomShow)
                     this.dynamicTags = [];
                     this.bottomShow = [];
@@ -318,36 +331,43 @@ a {
     transform: translate(-50%, -50%);
 }
 
-.change {
+.card {
     display: flex;
+    padding: 5px;
+    width: 30%;
+    position: relative;
+    left: 35%;
+    flex-wrap: wrap;
+    color: #e25b0d;
+    font-weight: bold;  
+    justify-content: center;
+    align-items: center;
+}
+
+.menu-btn{
+    display: inline;
     position: fixed;
     bottom: 10%;
     right: 10%;
-    margin-left: 15px;
+}
+.change {
+    text-align: center;
+    width: 90px;
     box-shadow: 0 2px 4px rgba(233, 222, 222, 0.842), 0 0 6px rgba(233, 219, 219, 0.877);
     border: #d3d7db;
 }
 
 .start {
-    display: flex;
-    position: fixed;
-    bottom: 10%;
-    right: 25%;
-
-    margin-left: 15px;
-    margin-right: 45px;
+    text-align: center;
+    width: 90px;
     background-color: #e25b0d;
     box-shadow: 0 2px 4px rgba(233, 222, 222, 0.842), 0 0 6px rgba(233, 219, 219, 0.877);
     border: #d3d7db;
 }
 
 .reset {
-    display: flex;
-    position: fixed;
-    bottom: 10%;
-    right: 15%;
-
-    margin-right: 60px;
+    text-align: center;
+    width: 90px;
     background-color: #c0dee2;
     box-shadow: 0 2px 4px rgba(233, 222, 222, 0.842), 0 0 6px rgba(233, 219, 219, 0.877);
     border: #d3d7db;
@@ -362,5 +382,15 @@ a {
     width: 100px;
     justify-content: center;
     align-items: center;
+}
+
+.container{
+    display: flex;
+    flex-direction: column;
+}
+.con-main {
+    display: flex;
+    padding-top: 5%;
+    height: calc(100vh - 30px)
 }
 </style>
