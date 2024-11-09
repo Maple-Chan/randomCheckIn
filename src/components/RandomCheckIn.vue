@@ -36,6 +36,11 @@
         <el-button v-debounce:5000="handleRandomCheck" type="primary" class="start">
             开始点名
         </el-button>
+
+        <el-button v-debounce:5000="resetCheck" type="primary" class="reset">
+            重置点名
+        </el-button>
+
     </div>
 </template>
 
@@ -198,6 +203,15 @@ export default {
             this.notCheckSutList = [];
             this.dynamicTags.forEach(item => this.notCheckSutList.push(item)); // 初始化为点名为完整名单
             this.alreadyCheckedList = []; // 初始化已点名为空
+
+            // 已选中的标记按钮点亮
+            this.notCheckSutList.forEach(item => {
+                for (let i = 0; i < this.bottomShow.length; ++i) {
+                    if (this.bottomShow[i].text == item) {
+                        this.bottomShow[i].isActive = false;
+                    }
+                }
+            })
         },
         handleKeyUp(event) {
             // 检查按键是否是回车键
@@ -302,7 +316,7 @@ a {
     position: fixed;
     bottom: 10%;
     right: 10%;
-    margin-left: 16px;
+    margin-left: 15px;
     box-shadow: 0 2px 4px rgba(233, 222, 222, 0.842), 0 0 6px rgba(233, 219, 219, 0.877);
     border: #d3d7db;
 }
@@ -311,11 +325,23 @@ a {
     display: flex;
     position: fixed;
     bottom: 10%;
-    right: 20%;
+    right: 25%;
 
-    margin-left: 16px;
-    margin-right: 60px;
+    margin-left: 15px;
+    margin-right: 45px;
     background-color: #e25b0d;
+    box-shadow: 0 2px 4px rgba(233, 222, 222, 0.842), 0 0 6px rgba(233, 219, 219, 0.877);
+    border: #d3d7db;
+}
+
+.reset {
+    display: flex;
+    position: fixed;
+    bottom: 10%;
+    right: 15%;
+
+    margin-right: 60px;
+    background-color: #c0dee2;
     box-shadow: 0 2px 4px rgba(233, 222, 222, 0.842), 0 0 6px rgba(233, 219, 219, 0.877);
     border: #d3d7db;
 }
